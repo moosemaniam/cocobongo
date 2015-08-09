@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project(Go_coc)
+find_package( OpenCV REQUIRED )
+add_executable( cocoGo test.cpp )
+target_link_libraries( cocoGo ${OpenCV_LIBS} )
