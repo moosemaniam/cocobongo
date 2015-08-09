@@ -2,13 +2,14 @@
  * @file test.cpp
  * @brief  Test app
  * @author Vikas MK
- * @version 1.1
+ * @version 1.2
  * @date 2015-08-07
  */
 
 /*Revision history*/
 /*1.0 : Created */
 /*1.1 : Added Image class and methods. Compiles, doesnt' work */
+/*1.2 : Compiles and displays test images. Histogram part is buggy*/
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -19,19 +20,18 @@ using namespace cv;
 #define NO_OF_BINS 256
 class Image
 {
-public:
-    Mat imageRaw;
-
-    string FileName;
-    Mat b_hist,r_hist,g_hist; /*histogram of all 3 channels*/
-    int histSize ;/*Size of histogram*/
-    vector<Mat> bgrPlanes; /*Histogram will be split into rgb subspace*/
-    float range[2];
-    const float* histRange;
-
-    Image(void);
-    Image(Mat aMat); /*Initializes the image info, and calculates histogram*/
-    void DisplayHistogram(void);
+    private:
+        float range[2];
+        vector<Mat> bgrPlanes; /*Histogram will be split into rgb subspace*/
+        Mat b_hist,r_hist,g_hist; /*histogram of all 3 channels*/
+        int histSize ;/*Size of histogram*/
+        const float* histRange;
+    public:
+        Mat imageRaw;
+        string FileName;
+        Image(void);
+        Image(Mat aMat); /*Initializes the image info, and calculates histogram*/
+        void DisplayHistogram(void);
 };
 
 
@@ -39,7 +39,8 @@ Image::Image(Mat aMat)
 {
     histSize = NO_OF_BINS;
     /*Copy to imageRaw*/
-    aMat.copyTo (imageRaw);
+    imageRaw = aMat.clone();
+
     cv::split(imageRaw,bgrPlanes);
 
     range[0] = 0;
@@ -51,8 +52,8 @@ Image::Image(Mat aMat)
 
 void Image::DisplayHistogram(void)
 {
-    int hist_w = imageRaw.cols;
-    int hist_h = imageRaw.rows;
+    int hist_w = 200;//;imageRaw.cols;
+    int hist_h = 200;//imageRaw.rows;
     int bin_w = cvRound( (double) hist_w/histSize );
 
     Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
@@ -82,10 +83,9 @@ void Image::DisplayHistogram(void)
 /*Open all files in a given path*/
 int main()
 {
-
-    string images[NO_IMAGES+1];
     vector <Image> vImages;
 
+    /*Read images from files and add it into a vector*/
     for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
     {
         Mat img_raw;
@@ -94,14 +94,23 @@ int main()
         ss << "./training_images/coco_images/coco" <<fileNumber<<".jpg"<<endl;
         ss >> FileName;
         cout << FileName<< endl ;
-        img_raw = cv::imread(images[fileNumber],1);
+        img_raw = cv::imread(FileName,1);
         Image I(img_raw);
         I.FileName = FileName;
+        vImages.push_back(I);
+    }
+
+    /*Display vectors*/
+    for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
+    {
+        if(vImages[fileNumber-1].imageRaw.data != NULL)
         {
             namedWindow("Display Image", WINDOW_AUTOSIZE );
-            cv::imshow("Display Image",I.imageRaw);
+            cv::imshow("Display Image",vImages[fileNumber-1].imageRaw);
+            cout << "rows:" << vImages[fileNumber-1].imageRaw.rows << endl;
+            cout << "cols:" << vImages[fileNumber-1].imageRaw.cols << endl;
+//            vImages[fileNumber-1].DisplayHistogram();
             waitKey(0);
         }
     }
-
 }
