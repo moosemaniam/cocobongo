@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+set(MAKE_BUILD_TYPE Debug)
+find_package( OpenCV REQUIRED)
+file(GLOB_RECURSE CPP_SRC "*.cpp")
+add_library(coconut ${CPP_SRC}  ${OpenCV_libs})
