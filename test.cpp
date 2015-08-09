@@ -2,7 +2,7 @@
  * @file test.cpp
  * @brief  Test app
  * @author Vikas MK
- * @version 1.2
+ * @version 1.3
  * @date 2015-08-07
  */
 
@@ -10,6 +10,7 @@
 /*1.0 : Created */
 /*1.1 : Added Image class and methods. Compiles, doesnt' work */
 /*1.2 : Compiles and displays test images. Histogram part is buggy*/
+/*1.3 : calculates and displays Histograms correctly*/
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -18,6 +19,7 @@
 using namespace std;
 using namespace cv;
 #define NO_OF_BINS 256
+
 class Image
 {
     private:
@@ -48,6 +50,8 @@ Image::Image(Mat aMat)
 
     histRange =  range ;
     cv::calcHist(&bgrPlanes[0],1,0,Mat(),b_hist,1,&histSize,&histRange,true,false);
+    cv::calcHist(&bgrPlanes[1],1,0,Mat(),g_hist,1,&histSize,&histRange,true,false);
+    cv::calcHist(&bgrPlanes[2],1,0,Mat(),r_hist,1,&histSize,&histRange,true,false);
 }
 
 void Image::DisplayHistogram(void)
@@ -56,11 +60,14 @@ void Image::DisplayHistogram(void)
     int hist_h = 200;//imageRaw.rows;
     int bin_w = cvRound( (double) hist_w/histSize );
 
+    cout << "bin_w" << bin_w << endl;
+
     Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
     normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
     normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
     normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+
 
     for( int i = 1; i < histSize; i++ )
     {
@@ -75,9 +82,10 @@ void Image::DisplayHistogram(void)
                 Scalar( 0, 0, 255), 2, 8, 0  );
     }
 
-    namedWindow("calcHist Demo", WINDOW_AUTOSIZE );
-    imshow("calcHist Demo", histImage );
+    namedWindow("Histogram", WINDOW_AUTOSIZE );
+    imshow("Histogram", histImage );
 }
+
 #define NO_IMAGES 10
 
 /*Open all files in a given path*/
@@ -105,11 +113,11 @@ int main()
     {
         if(vImages[fileNumber-1].imageRaw.data != NULL)
         {
-            namedWindow("Display Image", WINDOW_AUTOSIZE );
-            cv::imshow("Display Image",vImages[fileNumber-1].imageRaw);
+            namedWindow("Testimage", WINDOW_AUTOSIZE );
+            cv::imshow("Testimage",vImages[fileNumber-1].imageRaw);
             cout << "rows:" << vImages[fileNumber-1].imageRaw.rows << endl;
             cout << "cols:" << vImages[fileNumber-1].imageRaw.cols << endl;
-//            vImages[fileNumber-1].DisplayHistogram();
+            vImages[fileNumber-1].DisplayHistogram();
             waitKey(0);
         }
     }
