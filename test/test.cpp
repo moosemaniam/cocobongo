@@ -29,6 +29,8 @@ int main()
 {
     vector <Image> vImages;
 
+   Mat svmTrainingData;
+   int svmlabels;
     /*Read images from files and add it into a vector*/
     for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
     {
@@ -40,22 +42,36 @@ int main()
         cout << FileName<< endl ;
         img_raw = cv::imread(FileName,1);
         Image I(img_raw);
+        cout << "row*col" << I.g_hist.rows * I.g_hist.cols << endl;
+        cout <<"total row * col * 3 " <<I.rawHistData.rows * I.rawHistData.cols << endl;
         I.FileName = FileName;
         vImages.push_back(I);
+
+
     }
 
-    /*Display vectors*/
-    for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
-    {
-        if(vImages[fileNumber-1].imageRaw.data != NULL)
-        {
-            namedWindow("Testimage", WINDOW_AUTOSIZE );
-            cv::imshow("Testimage",vImages[fileNumber-1].imageRaw);
-            cout << "rows:" << vImages[fileNumber-1].imageRaw.rows << endl;
-            cout << "cols:" << vImages[fileNumber-1].imageRaw.cols << endl;
-            vImages[fileNumber-1].DisplayHistogram();
-            waitKey(0);
-        }
-    }
+   vector <Image>::iterator  imageIterator;
+
+   for(imageIterator = vImages.begin();imageIterator != vImages.end(); imageIterator++)
+   {
+
+       svmTrainingData.push_back(imageIterator->rawHistData);
+
+       /*Display images*/
+       if(imageIterator->imageRaw.data != NULL)
+       {
+           namedWindow("Testimage", WINDOW_AUTOSIZE );
+           cv::imshow("Testimage",imageIterator->imageRaw);
+           imageIterator->DisplayHistogram();
+           waitKey(0);
+       }
+
+       /*Copy rgb historgram data into plain arraws
+        * If there are N images, that would be N rows of rgb histogram data  
+        * Note: when copying data form a Mat object to a normal*/
+
+
+   }
+   cout << "training data dimension" << svmTrainingData.rows * svmTrainingData.cols << endl;
 }
 

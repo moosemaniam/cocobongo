@@ -11,14 +11,16 @@ class Image
     private:
         float range[2];
         vector<Mat> bgrPlanes; /*Histogram will be split into rgb subspace*/
-        Mat b_hist,r_hist,g_hist; /*histogram of all 3 channels*/
         int histSize ;/*Size of histogram*/
         const float* histRange;
     public:
         Mat imageRaw;
+        Mat b_hist,r_hist,g_hist; /*histogram of all 3 channels*/
         string FileName;
         Image(void);
         Image(Mat aMat); /*Initializes the image info, and calculates histogram*/
         void DisplayHistogram(void);
+        
+        Mat rawHistData;/*Contains raw rgb histogram data*/
 };
 #endif

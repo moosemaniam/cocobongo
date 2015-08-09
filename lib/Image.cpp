@@ -15,9 +15,23 @@ Image::Image(Mat aMat)
     range[1] = NO_OF_BINS;
 
     histRange =  range ;
+
+    /*Histogram calculation*/
     cv::calcHist(&bgrPlanes[0],1,0,Mat(),b_hist,1,&histSize,&histRange,true,false);
     cv::calcHist(&bgrPlanes[1],1,0,Mat(),g_hist,1,&histSize,&histRange,true,false);
     cv::calcHist(&bgrPlanes[2],1,0,Mat(),r_hist,1,&histSize,&histRange,true,false);
+
+    /*Historgram normalization*/
+    normalize(b_hist, b_hist, 0, imageRaw.rows, NORM_MINMAX, -1, Mat() );
+    normalize(g_hist, g_hist, 0, imageRaw.rows, NORM_MINMAX, -1, Mat() );
+    normalize(r_hist, r_hist, 0, imageRaw.rows, NORM_MINMAX, -1, Mat() );
+
+    rawHistData.push_back(b_hist);
+    rawHistData.push_back(g_hist);
+    rawHistData.push_back(b_hist);
+
+    rawHistData = rawHistData.reshape(1,1);
+
 }
 
 void Image::DisplayHistogram(void)
@@ -26,13 +40,12 @@ void Image::DisplayHistogram(void)
     int hist_h = 200;//imageRaw.rows;
     int bin_w = cvRound( (double) hist_w/histSize );
 
-
     Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
-    normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-    normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-    normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-
+    /*Historgram normalization*/
+//    normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+//    normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+//    normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
 
     for( int i = 1; i < histSize; i++ )
     {
@@ -50,5 +63,3 @@ void Image::DisplayHistogram(void)
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     imshow("Histogram", histImage );
 }
-
-
