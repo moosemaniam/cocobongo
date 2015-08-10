@@ -40,6 +40,7 @@ void Image::DisplayHistogram(void)
     int hist_h = 200;//imageRaw.rows;
     int bin_w = cvRound( (double) hist_w/histSize );
 
+
     Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
     /*Historgram normalization*/

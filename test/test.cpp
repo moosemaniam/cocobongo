@@ -29,15 +29,16 @@ int main()
 {
     vector <Image> vImages;
 
-   Mat svmTrainingData;
-   int svmlabels;
+    Mat svmTrainingData;
+    int svmlabels;
     /*Read images from files and add it into a vector*/
+    /*Coconut tree images*/
     for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
     {
         Mat img_raw;
         stringstream ss;
         string FileName;
-        ss << "./training_images/coco_images/coco" <<fileNumber<<".jpg"<<endl;
+        ss << "../training_images/coco_images/coco" <<fileNumber<<".jpg"<<endl;
         ss >> FileName;
         cout << FileName<< endl ;
         img_raw = cv::imread(FileName,1);
@@ -45,33 +46,92 @@ int main()
         cout << "row*col" << I.g_hist.rows * I.g_hist.cols << endl;
         cout <<"total row * col * 3 " <<I.rawHistData.rows * I.rawHistData.cols << endl;
         I.FileName = FileName;
+        I.label = COCONUT;
         vImages.push_back(I);
 
 
     }
 
-   vector <Image>::iterator  imageIterator;
+    for(int fileNumber=1; fileNumber <= NO_IMAGES ; fileNumber++)
+    {
+        Mat img_raw;
+        stringstream ss;
+        string FileName;
+        ss << "../training_images/non_coco_images/ncoco" <<fileNumber<<".jpg"<<endl;
+        ss >> FileName;
+        cout << FileName<< endl ;
+        img_raw = cv::imread(FileName,1);
+        Image I(img_raw);
+        cout << "row*col" << I.g_hist.rows * I.g_hist.cols << endl;
+        cout <<"total row * col * 3 " <<I.rawHistData.rows * I.rawHistData.cols << endl;
+        I.FileName = FileName;
+        I.label = NOT_COCONUT;
+        vImages.push_back(I);
 
-   for(imageIterator = vImages.begin();imageIterator != vImages.end(); imageIterator++)
-   {
+    }
 
-       svmTrainingData.push_back(imageIterator->rawHistData);
-
-       /*Display images*/
-       if(imageIterator->imageRaw.data != NULL)
-       {
-           namedWindow("Testimage", WINDOW_AUTOSIZE );
-           cv::imshow("Testimage",imageIterator->imageRaw);
-           imageIterator->DisplayHistogram();
-           waitKey(0);
-       }
-
-       /*Copy rgb historgram data into plain arraws
-        * If there are N images, that would be N rows of rgb histogram data  
-        * Note: when copying data form a Mat object to a normal*/
+    vector <Image>::iterator  imageIterator;
 
 
-   }
-   cout << "training data dimension" << svmTrainingData.rows * svmTrainingData.cols << endl;
+    int size=vImages.size();
+    float *pfLabels = new float[size]; 
+    int i=0;
+    for(imageIterator = vImages.begin();imageIterator != vImages.end(); imageIterator++,i++)
+    {
+
+        Mat labelMat(1,1,imageIterator->label);
+
+        svmTrainingData.push_back(imageIterator->rawHistData);
+        pfLabels[i] = (float)imageIterator->label;
+
+
+        /*Display images*/
+        // if(imageIterator->imageRaw.data != NULL)
+        // {
+        //     namedWindow("Testimage", WINDOW_AUTOSIZE );
+        //     cv::imshow("Testimage",imageIterator->imageRaw);
+        //     imageIterator->DisplayHistogram();
+        //     waitKey(0);
+        // }
+
+
+
+    }
+    Mat svmTrainingLabel(size,1,CV_32FC1,pfLabels) ;
+    cout << "training data dimension" << svmTrainingData.rows << "x" <<  svmTrainingData.cols << endl;
+    cout << "training labels dimension" << svmTrainingLabel.rows << "x" <<  svmTrainingLabel.cols << endl;
+
+    CvSVMParams  params;
+    params.svm_type = CvSVM::C_SVC;
+    params.kernel_type= CvSVM::LINEAR;
+    params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER,100,1e-6);
+    CvSVM SVM;
+
+    SVM.train(svmTrainingData,svmTrainingLabel,Mat(),Mat(),params);
+
+
+    vector <Image> vTestImages;
+    for(int fileNumber=1; fileNumber <= 14 ; fileNumber++)
+    {
+        Mat img_raw;
+        stringstream ss;
+        string FileName;
+        ss << "../training_images/test_images/test" <<fileNumber<<".jpg"<<endl;
+        ss >> FileName;
+        cout << FileName<< endl ;
+        img_raw = cv::imread(FileName,1);
+        Image I(img_raw);
+        I.FileName = FileName;
+        int response = SVM.predict(I.rawHistData);
+        if(response == COCONUT) 
+        {
+            cout << "COCONUT" << endl;
+        }
+        else
+        {
+            cout << "NOT COCO NUT" << endl;
+        }
+    }
+
+
 }
-

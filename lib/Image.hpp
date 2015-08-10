@@ -1,6 +1,7 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "svmClassifier.hpp"
 #ifndef IMAGE_CPP_H
 #define IMAGE_CPP_H
 
@@ -20,6 +21,7 @@ class Image
         Image(void);
         Image(Mat aMat); /*Initializes the image info, and calculates histogram*/
         void DisplayHistogram(void);
+        int label;
         
         Mat rawHistData;/*Contains raw rgb histogram data*/
 };
